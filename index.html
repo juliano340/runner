@@ -44,6 +44,11 @@
             font-size: 24px;
             margin-top: 20px;
         }
+
+        #timer-state {
+            font-size: 18px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -71,6 +76,7 @@
         <button id="stop-button" style="display: none;" onclick="pararTemporizador()">Parar</button>
 
         <div class="timer" id="temporizador-regressivo"></div>
+        <div id="timer-state">Correr</div>
     </div>
 
     <script>
@@ -92,6 +98,7 @@
             iniciarContagemRegressiva(corrida ? totalSegundosCorrida : totalSegundosDescanso);
             document.getElementById("stop-button").style.display = "block";
             document.getElementById("start-button").style.display = "none";
+            document.getElementById("timer-state").textContent = corrida ? "Correr" : "Descanso";
         }
 
         function iniciarContagemRegressiva(tempo) {
@@ -122,6 +129,7 @@
             clearInterval(timerInterval);
             document.getElementById("stop-button").style.display = "none";
             document.getElementById("start-button").style.display = "block";
+            document.getElementById("timer-state").textContent = corrida ? "Correr" : "Descanso";
         }
 
         function formatarTempo(segundos) {
