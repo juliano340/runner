@@ -49,6 +49,11 @@
             font-size: 18px;
             margin-top: 10px;
         }
+
+        .total-info {
+            font-size: 18px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -65,7 +70,7 @@
         </div>
         <h2>Tempo de Descanso</h2>
         <div class="input-container">
-            <label for="minutos-descanso">Minutos:</label>
+            <label for "minutos-descanso">Minutos:</label>
             <input type="number" id="minutos-descanso" min="0" max="59" placeholder="Minutos">
         </div>
         <div class="input-container">
@@ -76,15 +81,20 @@
         <button id="stop-button" style="display: none;" onclick="pararTemporizador()">Parar</button>
 
         <div class="timer" id="temporizador-regressivo"></div>
-        <div id="timer-state">Correr</div>
+        <div id="timer-state" style="font-size: 30px; color: red;font-weight: 600;">Correr</div>
+        <div class="total-info" id="tempo-decorrido-info" style="font-size: 20px;">Tempo TOTAL: 0:00</div>
     </div>
 
     <script>
         var timerInterval;
+        var tempoDecorridoInterval;
         var beepSound = new Audio('beep.mp3'); // Substitua 'beep.mp3' pelo caminho para o seu arquivo de som de beep
         var corrida = true;
         var totalSegundosCorrida;
         var totalSegundosDescanso;
+        var tempoTotalExercicio = 0; // Tempo total do exercício
+        var tempoInicioExercicio = 0; // Hora de início do exercício
+        var tempoDecorrido = 0; // Tempo decorrido em segundos
 
         function iniciarTemporizador() {
             var minutosCorrida = parseInt(document.getElementById("minutos-corrida").value) || 0; // Inicializar com zero se estiver vazio
@@ -95,10 +105,18 @@
             totalSegundosCorrida = minutosCorrida * 60 + segundosCorrida;
             totalSegundosDescanso = minutosDescanso * 60 + segundosDescanso;
 
+            tempoTotalExercicio = 0;
+            tempoInicioExercicio = new Date().getTime();
+
+            atualizarTempoDecorrido();
+            atualizarEstadoTemporizador();
+
             iniciarContagemRegressiva(corrida ? totalSegundosCorrida : totalSegundosDescanso);
             document.getElementById("stop-button").style.display = "block";
             document.getElementById("start-button").style.display = "none";
-            document.getElementById("timer-state").textContent = corrida ? "Correr" : "Descanso";
+
+            // Iniciar a atualização do tempo decorrido em tempo real
+            tempoDecorridoInterval = setInterval(atualizarTempoDecorrido, 1000);
         }
 
         function iniciarContagemRegressiva(tempo) {
@@ -112,13 +130,14 @@
                 timerElement.textContent = formatarTempo(contador);
 
                 if (contador <= 3) {
-                    beepSound.play(); // Reproduzir o som de beep nos últimos 3 segundos
+                    beepSound.play();
                 }
 
-                if (contador <= 0) {
-                    clearInterval(timerInterval);
-                    corrida = !corrida; // Alternar entre corrida e descanso
-                    iniciarTemporizador(); // Iniciar o próximo ciclo
+                if (contador <= 1) {
+                    corrida = !corrida;
+                    atualizarTempoDecorrido();
+                    atualizarEstadoTemporizador();
+                    iniciarContagemRegressiva(corrida ? totalSegundosCorrida : totalSegundosDescanso);
                 }
 
                 contador--;
@@ -127,15 +146,26 @@
 
         function pararTemporizador() {
             clearInterval(timerInterval);
+            clearInterval(tempoDecorridoInterval);
             document.getElementById("stop-button").style.display = "none";
             document.getElementById("start-button").style.display = "block";
-            document.getElementById("timer-state").textContent = corrida ? "Correr" : "Descanso";
+            atualizarEstadoTemporizador();
         }
 
         function formatarTempo(segundos) {
             var minutos = Math.floor(segundos / 60);
             var segundosRestantes = segundos % 60;
             return minutos + ":" + (segundosRestantes < 10 ? "0" : "") + segundosRestantes;
+        }
+
+        function atualizarTempoDecorrido() {
+            var tempoAtual = new Date().getTime();
+            tempoDecorrido = Math.floor((tempoAtual - tempoInicioExercicio) / 1000);
+            document.getElementById("tempo-decorrido-info").textContent = "Tempo Decorrido: " + formatarTempo(tempoDecorrido);
+        }
+
+        function atualizarEstadoTemporizador() {
+            document.getElementById("timer-state").textContent = corrida ? "Correr! 🏃🏃‍♀️" : "Descanso ativo! 🚶‍♀️🚶";
         }
     </script>
 </body>
